@@ -1,28 +1,46 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator';
-import { UserType } from '../../../entities/user.entity';
+// ===== src/modules/user/dto/create-user.dto.ts =====
+import { IsEmail, IsString, IsOptional, IsEnum } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { UserType, UserStatus } from '../../../entities/user.entity';
 
 export class CreateUserDto {
+  @ApiProperty()
   @IsString()
-  @IsNotEmpty()
+  clerk_user_id: string;
+
+  @ApiProperty()
+  @IsString()
   username: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty()
+  @IsEmail()
   email: string;
 
+  @ApiProperty()
   @IsString()
-  @IsNotEmpty()
   first_name: string;
 
+  @ApiProperty()
   @IsString()
-  @IsNotEmpty()
   last_name: string;
 
-  @IsEnum(UserType)
+  @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  avatar_url?: string;
+
+  @ApiPropertyOptional({ enum: UserType })
+  @IsOptional()
+  @IsEnum(UserType)
   user_type?: UserType;
 
-  @IsString()
+  @ApiPropertyOptional({ enum: UserStatus })
   @IsOptional()
-  clerk_user_id?: string;
+  @IsEnum(UserStatus)
+  status?: UserStatus;
 }

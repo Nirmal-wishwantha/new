@@ -1,10 +1,9 @@
-// src/app.service.ts
-
+// ===== src/app.service.ts =====
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
   getHello(): string {
-    return 'Hello World!';
+    return 'BookingLayer API is running successfully!';
   }
 }

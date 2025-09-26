@@ -1,11 +1,9 @@
-// src/modules/realtime/realtime.module.ts
+// ===== src/modules/realtime/realtime.module.ts =====
 import { Module } from '@nestjs/common';
-import { RealtimeGateway } from './realtime.gateway';
-import { DatabaseModule } from '../database/database.module';
+import { RealtimeService } from './realtime.service';
 
 @Module({
-  imports: [DatabaseModule],
-  providers: [RealtimeGateway],
-  exports: [RealtimeGateway],
+  providers: [RealtimeService],
+  exports: [RealtimeService],
 })
 export class RealtimeModule {}

@@ -1,21 +1,14 @@
+// ===== src/modules/user/user.module.ts =====
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from '../../entities/user.entity';
 import { UserService } from './services/user.service';
 import { UserController } from './controllers/user.controller';
-import { DatabaseModule } from '../database/database.module';
-import { ClerkAuthGuard } from './guards/clerk-auth.guard';
-import { ClerkService } from './services/clerk.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { RolesGuard } from './guards/roles.guard';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-  ],
+  imports: [TypeOrmModule.forFeature([User])],
   controllers: [UserController],
-  providers: [UserService, ClerkService, ClerkAuthGuard, ConfigService, RolesGuard],
-  exports: [UserService, ClerkAuthGuard],
+  providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule {}

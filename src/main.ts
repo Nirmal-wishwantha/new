@@ -1,5 +1,4 @@
-//src/main.ts
-
+// ===== src/main.ts =====
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -32,7 +31,7 @@ async function bootstrap() {
 
   // CORS configuration
   app.enableCors({
-    origin: ['http://localhost:4000', 'https://your-frontend-domain.com'],
+    origin: ['http://localhost:3000', 'http://localhost:4000', 'https://your-frontend-domain.com'],
     credentials: true,
   });
 
@@ -42,7 +41,7 @@ async function bootstrap() {
   // Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('BookingLayer API')
-    .setDescription('User Management API with Clerk integration')
+    .setDescription('Hotel Booking Management API with Clerk integration')
     .setVersion('1.0')
     .addBearerAuth({
       type: 'http',
@@ -61,6 +60,7 @@ async function bootstrap() {
 
   console.log(`🚀 Application is running on: http://localhost:${port}`);
   console.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
+  console.log(`🗄️ Database: Connected to Supabase`);
 }
 
 bootstrap();

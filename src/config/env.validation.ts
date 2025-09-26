@@ -19,7 +19,10 @@ export class EnvironmentVariables {
   SUPABASE_SERVICE_KEY: string;
 
   @IsString()
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: string;
+  DATABASE_URL: string;
+
+  @IsString()
+  CLERK_PUBLISHABLE_KEY: string;
 
   @IsString()
   CLERK_SECRET_KEY: string;
