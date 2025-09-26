@@ -1,54 +1,63 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { verifyToken } from '@clerk/backend';
-import { ClerkService } from '../services/clerk.service';
 import { UserService } from '../services/user.service';
-
-interface ClerkJwtPayload {
-  sid: string;
-}
-
-interface ClerkSession {
-  userId: string;
-}
 
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
   constructor(
-    private clerkService: ClerkService,
-    private userService: UserService,
     private configService: ConfigService,
+    private userService: UserService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const authHeader = request.headers.authorization;
+    const token = this.extractTokenFromHeader(request);
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('No authorization token provided');
+    if (!token) {
+      throw new UnauthorizedException('No token provided');
     }
 
-    const sessionToken = authHeader.substring(7);
-
     try {
-      const payload = await verifyToken(sessionToken, {
-        secretKey: this.configService.get<string>('CLERK_SECRET_KEY')!,
-      }) as ClerkJwtPayload;
+      // Use Clerk's API to verify the token
+      const clerkSecretKey = this.configService.get<string>('CLERK_SECRET_KEY');
+      
+      const response = await fetch('https://api.clerk.com/v1/sessions/verify', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${clerkSecretKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
 
-      const sessionId = payload.sid;
-      const session = await this.clerkService.verifySession(sessionId, sessionToken) as ClerkSession;
-
-      if (!session) {
-        throw new UnauthorizedException('Invalid session token');
+      if (!response.ok) {
+        throw new UnauthorizedException('Invalid token');
       }
 
-      const user = await this.userService.findByClerkId(session.userId);
-      await this.userService.updateLastLogin(user.user_id);
+      const sessionData = await response.json();
+      const clerkUserId = sessionData.user_id;
+
+      // Find user in database
+      const user = await this.userService.findByClerkIdSafe(clerkUserId);
+      
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      // Attach user to request
       request.user = user;
+      
+      // Update last login
+      await this.userService.updateLastLogin(user.user_id);
 
       return true;
     } catch (error) {
-      throw new UnauthorizedException('Authentication failed');
+      throw new UnauthorizedException('Invalid token');
     }
+  }
+
+  private extractTokenFromHeader(request: any): string | undefined {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }
